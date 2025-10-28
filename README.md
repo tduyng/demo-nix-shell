@@ -47,7 +47,7 @@ nix develop
 
 **Nix manages:**
 
-- Node.js runtime (version 20)
+- Node.js runtime (version 24)
 - pnpm package manager
 - System services (PostgreSQL, Redis, Docker)
 

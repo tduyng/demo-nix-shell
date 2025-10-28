@@ -17,16 +17,11 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        # Configuration - easily customizable
-        config = {
-          nodejs = pkgs.nodejs_24; # Change Node.js version here
-        };
-
         # Base tools that everyone needs
         baseDevTools = with pkgs; [
-          config.nodejs
           nodePackages.pnpm
           esbuild
+          fnm
 
           # Common utilities
         ];
@@ -48,8 +43,7 @@
           pkgs.mkShell {
             buildInputs = baseDevTools ++ extraPackages;
             shellHook = setupScript;
-
-            # Don't force a specific shell
+            # # Don't force a specific shell
             NIX_SHELL_PRESERVE_PROMPT = 1;
           };
 
@@ -59,12 +53,12 @@
         devShells = {
           default = createProjectShell [ ];
 
+          # add front
+
           services = createProjectShell (
             with pkgs;
             [
-              postgresql
               redis
-              docker
             ]
           );
 
@@ -82,6 +76,7 @@
               docker
               kubernetes-helm
               kubectl
+              # monitoring tools ...
             ]
           );
         };
