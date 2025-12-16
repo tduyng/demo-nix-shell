@@ -17,71 +17,95 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        # Base tools that everyone needs
-        baseDevTools = with pkgs; [
+        # Base development tools available in all shells
+        baseTools = with pkgs; [
+          fish
           nodePackages.pnpm
           esbuild
           fnm
-
-          # Common utilities
         ];
 
-        # Minimal setup script for direnv compatibility
-        setupScript = ''
-          # Add node_modules/.bin to PATH for any shell
-          export PATH="$PWD/node_modules/.bin:$PATH"
-
-          # Nix environment confirmation with tools versions
-          echo -e "\033[32m❄️ Nix development environment activated\033[0m"
-          echo -e "\033[32m🚀 Node.js $(node --version) + pnpm $(pnpm --version) ready\033[0m"
-          echo -e "\033[32m📦 Available via Nix flake: esbuild, and more...\033[0m"
-        '';
-
-        # Create shell function
-        createProjectShell =
-          extraPackages:
+        # Create a development shell with custom message
+        mkDevShell =
+          {
+            packages ? [ ],
+            shellName ? "default",
+            message ? "",
+          }:
           pkgs.mkShell {
-            buildInputs = baseDevTools ++ extraPackages;
-            shellHook = setupScript;
-            # # Don't force a specific shell
+            name = "demo-nix-shell-${shellName}";
+            buildInputs = baseTools ++ packages;
+            shellHook = ''
+              export PATH="$PWD/node_modules/.bin:$PATH"
+
+              # Initialize fnm to prevent warnings
+              eval "$(fnm env --use-on-cd)"
+
+              ${message}
+            '';
             NIX_SHELL_PRESERVE_PROMPT = 1;
           };
 
       in
       {
-        # Development shells
         devShells = {
-          default = createProjectShell [ ];
+          default = mkDevShell {
+            shellName = "default";
+            message = ''
+              echo -e "\033[32m❄️  Nix shell: default\033[0m"
+              echo -e "\033[36m📦 Tools: pnpm, esbuild, fnm\033[0m"
+            '';
+          };
 
-          # add front
+          services = mkDevShell {
+            shellName = "services";
+            packages = with pkgs; [ redis ];
+            message = ''
+              echo -e "\033[32m❄️  Nix shell: services\033[0m"
+              echo -e "\033[36m📦 Tools: pnpm, esbuild, fnm, redis\033[0m"
+            '';
+          };
 
-          services = createProjectShell (
-            with pkgs;
-            [
-              redis
-            ]
-          );
+          database = mkDevShell {
+            shellName = "database";
+            packages = with pkgs; [
+              sqlite
+              sqlitebrowser
+            ];
+            message = ''
+              echo -e "\033[32m❄️  Nix shell: database\033[0m"
+              echo -e "\033[36m📦 Tools: pnpm, esbuild, fnm, sqlite, sqlitebrowser\033[0m"
+            '';
+          };
 
-          testing = createProjectShell (
-            with pkgs;
-            [
+          testing = mkDevShell {
+            shellName = "testing";
+            packages = with pkgs; [
+              k6
+              httpie
+              jq
+            ];
+            message = ''
+              echo -e "\033[32m❄️  Nix shell: testing\033[0m"
+              echo -e "\033[36m📦 Tools: pnpm, esbuild, fnm, k6, httpie, jq\033[0m"
+            '';
+          };
+
+          heavy = mkDevShell {
+            shellName = "heavy";
+            packages = with pkgs; [
               docker
               postgresql
-            ]
-          );
-
-          devops = createProjectShell (
-            with pkgs;
-            [
-              docker
               kubernetes-helm
               kubectl
-              # monitoring tools ...
-            ]
-          );
+            ];
+            message = ''
+              echo -e "\033[32m❄️  Nix shell: heavy\033[0m"
+              echo -e "\033[36m📦 Tools: pnpm, esbuild, fnm, docker, postgresql, kubernetes-helm, kubectl\033[0m"
+            '';
+          };
         };
 
-        # Formatter for `nix fmt`
         formatter = pkgs.nixpkgs-fmt;
       }
     );
