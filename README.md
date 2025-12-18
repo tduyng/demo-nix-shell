@@ -59,10 +59,16 @@ nix develop
 
 ## Project structure
 
-```
-demo-nix-shell/
-├── flake.nix              # Nix environment
-├── .envrc                 # direnv config
-├── packages/              # Shared packages
-└── apps/                  # Applications
+```bash
+❯ lt
+ .
+├──  .envrc
+├──  .nvmrc
+├──  flake.lock
+├──  flake.nix
+├──  packages
+│   └──  shared-utils
+│       ├──  package.json
+│       └──  tsconfig.json
+└── 󰂺 README.md
 ```
