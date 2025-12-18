@@ -29,7 +29,7 @@ cd demo-nix-shell  # direnv loads default shell automatically
 
 ```bash
 nix develop -c fish            # Default: Node.js + pnpm only
-nix develop .#services -c fish # + PostgreSQL, Redis, Docker
+nix develop .#databases -c fish # + PostgreSQL, Redis, Docker
 nix develop .#testing -c fish  # + Docker, PostgreSQL for tests
 nix develop .#devops -c fish   # + Kubernetes, Helm
 ```

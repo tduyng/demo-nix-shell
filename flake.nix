@@ -57,24 +57,14 @@
             '';
           };
 
-          services = mkDevShell {
-            shellName = "services";
-            packages = with pkgs; [ redis ];
-            message = ''
-              echo -e "\033[32m❄️  Nix shell: services\033[0m"
-              echo -e "\033[36m📦 Tools: pnpm, esbuild, fnm, redis\033[0m"
-            '';
-          };
-
           database = mkDevShell {
             shellName = "database";
             packages = with pkgs; [
-              sqlite
-              sqlitebrowser
+              redis
             ];
             message = ''
               echo -e "\033[32m❄️  Nix shell: database\033[0m"
-              echo -e "\033[36m📦 Tools: pnpm, esbuild, fnm, sqlite, sqlitebrowser\033[0m"
+              echo -e "\033[36m📦 Tools: pnpm, esbuild, fnm, redis\033[0m"
             '';
           };
 
@@ -91,17 +81,17 @@
             '';
           };
 
-          heavy = mkDevShell {
+          devops = mkDevShell {
             shellName = "heavy";
             packages = with pkgs; [
               docker
-              postgresql
               kubernetes-helm
               kubectl
+              redis
             ];
             message = ''
               echo -e "\033[32m❄️  Nix shell: heavy\033[0m"
-              echo -e "\033[36m📦 Tools: pnpm, esbuild, fnm, docker, postgresql, kubernetes-helm, kubectl\033[0m"
+              echo -e "\033[36m📦 Tools: pnpm, esbuild, fnm, docker, kubernetes, helm, redis\033[0m"
             '';
           };
         };
