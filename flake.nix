@@ -7,93 +7,48 @@
   };
 
   outputs =
-    {
-      self,
-      nixpkgs,
-      flake-utils,
-    }:
+    { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        # Base development tools available in all shells
-        baseTools = with pkgs; [
-          fish
-          pnpm
-          esbuild
-          fnm
-        ];
+        baseTools = with pkgs; [ pnpm esbuild fnm ];
 
-        # Create a development shell with custom message
         mkDevShell =
-          {
-            packages ? [ ],
-            shellName ? "default",
-            message ? "",
-          }:
+          { packages ? [ ], shellName ? "default", tools ? "pnpm, esbuild, fnm" }:
           pkgs.mkShell {
             name = "demo-nix-shell-${shellName}";
             buildInputs = baseTools ++ packages;
             shellHook = ''
               export PATH="$PWD/node_modules/.bin:$PATH"
-
-              # Initialize fnm to prevent warnings
               eval "$(fnm env --use-on-cd)"
-
-              ${message}
-              [[ $- == *i* ]] && exec fish
+              echo -e "\033[32m Nix shell: ${shellName}\033[0m"
+              echo -e "\033[36m Tools: ${tools}\033[0m"
             '';
-            NIX_SHELL_PRESERVE_PROMPT = 1;
           };
 
       in
       {
         devShells = {
-          default = mkDevShell {
-            shellName = "default";
-            message = ''
-              echo -e "\033[32m❄️  Nix shell: default\033[0m"
-              echo -e "\033[36m📦 Tools: pnpm, esbuild, fnm\033[0m"
-            '';
-          };
+          default = mkDevShell { };
 
           database = mkDevShell {
             shellName = "database";
-            packages = with pkgs; [
-              redis
-            ];
-            message = ''
-              echo -e "\033[32m❄️  Nix shell: database\033[0m"
-              echo -e "\033[36m📦 Tools: pnpm, esbuild, fnm, redis\033[0m"
-            '';
+            packages = with pkgs; [ redis ];
+            tools = "pnpm, esbuild, fnm, redis";
           };
 
           testing = mkDevShell {
             shellName = "testing";
-            packages = with pkgs; [
-              k6
-              httpie
-              jq
-            ];
-            message = ''
-              echo -e "\033[32m❄️  Nix shell: testing\033[0m"
-              echo -e "\033[36m📦 Tools: pnpm, esbuild, fnm, k6, httpie, jq\033[0m"
-            '';
+            packages = with pkgs; [ k6 httpie jq ];
+            tools = "pnpm, esbuild, fnm, k6, httpie, jq";
           };
 
           devops = mkDevShell {
-            shellName = "heavy";
-            packages = with pkgs; [
-              docker
-              kubernetes-helm
-              kubectl
-              redis
-            ];
-            message = ''
-              echo -e "\033[32m❄️  Nix shell: heavy\033[0m"
-              echo -e "\033[36m📦 Tools: pnpm, esbuild, fnm, docker, kubernetes, helm, redis\033[0m"
-            '';
+            shellName = "devops";
+            packages = with pkgs; [ docker kubernetes-helm kubectl redis ];
+            tools = "pnpm, esbuild, fnm, docker, kubernetes, helm, redis";
           };
         };
 
