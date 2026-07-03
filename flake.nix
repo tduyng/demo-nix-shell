@@ -2,7 +2,7 @@
   description = "Modern Node.js/TypeScript monorepo with Nix flakes and direnv";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -20,7 +20,7 @@
         # Base development tools available in all shells
         baseTools = with pkgs; [
           fish
-          nodePackages.pnpm
+          pnpm
           esbuild
           fnm
         ];
@@ -42,6 +42,7 @@
               eval "$(fnm env --use-on-cd)"
 
               ${message}
+              [[ $- == *i* ]] && exec fish
             '';
             NIX_SHELL_PRESERVE_PROMPT = 1;
           };
